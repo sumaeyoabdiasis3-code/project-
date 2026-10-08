@@ -1,0 +1,72 @@
+@model List<PFDETBM.ViewModels.BudgetProgressItem>
+@{
+    ViewData["Title"] = "Budgets";
+    var budgets = (List<PFDETBM.Models.Budget>)ViewBag.Budgets;
+}
+
+<div class="dashboard-page">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="mb-1">Budgets</h1>
+            <p class="text-muted mb-0">Set monthly spending limits per category and track usage.</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">+ Create Budget</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <div class="card dashboard-card">
+        <div class="card-body">
+            @if (budgets.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr class="text-muted small">
+                                <th>Month</th>
+                                <th>Category</th>
+                                <th>Spent / Budget</th>
+                                <th style="width:220px;">Progress</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < budgets.Count; i++)
+                            {
+                                var b = budgets[i];
+                                var row = Model[i];
+                                var barColor = row.PercentUsed >= 100 ? "#dc2626" : row.PercentUsed >= 80 ? "#f59e0b" : "#16a34a";
+                                <tr>
+                                    <td class="text-muted small">@(new DateTime(b.Year, b.Month, 1).ToString("MMMM yyyy"))</td>
+                                    <td>@row.CategoryName</td>
+                                    <td>@row.Spent.ToString("C") / @row.BudgetAmount.ToString("C")</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar" style="width:@(Math.Min(row.PercentUsed, 100))%; background:@barColor;"></div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-action="Edit" asp-route-id="@b.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                        <form asp-action="Delete" asp-route-id="@b.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this budget?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <span class="empty-icon">📊</span>
+                    No budgets set yet. <a asp-action="Create">Create your first budget</a>.
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,143 @@
+@using Microsoft.EntityFrameworkCore
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> UserManager
+@inject PFDETBM.Data.ApplicationDbContext DbContext
+@{
+    var isAuthenticated = User.Identity != null && User.Identity.IsAuthenticated;
+    var currentUser = isAuthenticated ? await UserManager.GetUserAsync(User) : null;
+    var displayName = !string.IsNullOrWhiteSpace(currentUser?.FullName)
+        ? currentUser!.FullName!
+        : (User.Identity?.Name ?? "Guest");
+    var initial = displayName.Trim().Length > 0 ? displayName.Trim().Substring(0, 1).ToUpperInvariant() : "U";
+    var isAdmin = User.IsInRole("Admin");
+    var activeController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var activeArea = ViewContext.RouteData.Values["area"]?.ToString() ?? "";
+    var unreadCount = isAuthenticated && currentUser != null
+        ? await DbContext.Notifications.CountAsync(n => n.UserId == currentUser.Id && !n.IsRead)
+        : 0;
+
+    string NavClass(string controllerName) => "nav-link d-flex align-items-center " + (activeController == controllerName && activeArea == "" ? "active" : "");
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Personal Finance Dashboard</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/PFDETBM.styles.css" asp-append-version="true" />
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <div class="app-shell d-flex">
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+        <aside class="sidebar d-flex flex-column" id="appSidebar">
+            <div class="sidebar-brand px-4 py-4 d-flex align-items-center">
+                <div class="sidebar-brand-icon d-flex align-items-center justify-content-center">💰</div>
+                <div class="ms-3">
+                    <div class="sidebar-brand-title">Personal Finance</div>
+                    <small class="sidebar-brand-subtitle">Dashboard</small>
+                </div>
+            </div>
+
+            <nav class="nav flex-column px-3 sidebar-nav">
+                <a class="@NavClass("Dashboard")" asp-controller="Dashboard" asp-action="Index">
+                    <span class="nav-icon-badge nav-icon-blue">🏠</span><span>Dashboard</span>
+                </a>
+                <a class="@NavClass("Income")" asp-controller="Income" asp-action="Index">
+                    <span class="nav-icon-badge nav-icon-green">💵</span><span>Income</span>
+                </a>
+                <a class="@NavClass("Expense")" asp-controller="Expense" asp-action="Index">
+                    <span class="nav-icon-badge nav-icon-red">💳</span><span>Expenses</span>
+                </a>
+                <a class="@NavClass("Budget")" asp-controller="Budget" asp-action="Index">
+                    <span class="nav-icon-badge nav-icon-orange">📊</span><span>Budgets</span>
+                </a>
+                <a class="@NavClass("Transaction")" asp-controller="Transaction" asp-action="Index">
+                    <span class="nav-icon-badge nav-icon-purple">📁</span><span>Transactions</span>
+                </a>
+                <a class="@NavClass("SavingsGoal")" asp-controller="SavingsGoal" asp-action="Index">
+                    <span class="nav-icon-badge nav-icon-teal">🎯</span><span>Savings Goals</span>
+                </a>
+                <a class="@NavClass("Report")" asp-controller="Report" asp-action="Index">
+                    <span class="nav-icon-badge nav-icon-indigo">📈</span><span>Reports</span>
+                </a>
+                <a class="@NavClass("Notification")" asp-controller="Notification" asp-action="Index">
+                    <span class="nav-icon-badge nav-icon-amber">🔔</span><span>Notifications</span>
+                    @if (unreadCount > 0)
+                    {
+                        <span class="badge rounded-pill bg-danger ms-auto">@unreadCount</span>
+                    }
+                </a>
+                <div class="mt-auto pt-3">
+                    <a class="@NavClass("Settings")" asp-controller="Settings" asp-action="Index">
+                        <span class="nav-icon-badge nav-icon-gray">⚙️</span><span>Settings</span>
+                    </a>
+                    @if (isAdmin)
+                    {
+                        <a class="nav-link d-flex align-items-center @(activeArea == "Admin" ? "active" : "")" asp-area="Admin" asp-controller="Admin" asp-action="Index">
+                            <span class="nav-icon-badge nav-icon-navy">🛡️</span><span>Admin Panel</span>
+                        </a>
+                    }
+                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Login", "Account", new { area = "Identity" })" method="post">
+                        <button type="submit" class="nav-link d-flex align-items-center w-100 border-0 bg-transparent text-start">
+                            <span class="nav-icon-badge nav-icon-gray">🚪</span><span>Logout</span>
+                        </button>
+                    </form>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content flex-fill d-flex flex-column">
+            <header class="topbar d-flex align-items-center gap-3 px-3 px-md-4">
+                <button type="button" class="sidebar-toggle d-lg-none" id="sidebarToggle" aria-label="Toggle navigation">☰</button>
+
+                <div class="topbar-search flex-fill">
+                    <span class="topbar-search-icon">🔎</span>
+                    <input type="search" class="form-control" placeholder="Search transactions, categories…" disabled />
+                </div>
+
+                <div class="topbar-actions d-flex align-items-center gap-2">
+                    <a asp-controller="Notification" asp-action="Index" class="topbar-icon-btn position-relative text-decoration-none" aria-label="Notifications">
+                        🔔
+                        @if (unreadCount > 0)
+                        {
+                            <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle" style="font-size:0.6rem;">@unreadCount</span>
+                        }
+                    </a>
+
+                    <div class="dropdown">
+                        <button class="topbar-user-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="avatar rounded-circle">@initial</span>
+                            <span class="topbar-user-meta d-none d-md-flex flex-column">
+                                <strong>@displayName</strong>
+                                <small>@(isAdmin ? "Admin" : "User")</small>
+                            </span>
+                            <span class="topbar-caret">▾</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><span class="dropdown-item-text small text-muted">@displayName</span></li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li><a class="dropdown-item" asp-controller="Settings" asp-action="Index">Settings</a></li>
+                            <li>
+                                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Login", "Account", new { area = "Identity" })" method="post">
+                                    <button type="submit" class="dropdown-item">Logout</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <section class="content flex-fill p-3 p-md-4">
+                @RenderBody()
+            </section>
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

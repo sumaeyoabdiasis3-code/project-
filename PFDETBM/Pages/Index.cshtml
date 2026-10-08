@@ -1,0 +1,367 @@
+@page
+@model IndexModel
+@{
+    Layout = null;
+    var loginUrl = "/Identity/Account/Login";
+    var registerUrl = "/Identity/Account/Register";
+    var dashboardUrl = "/Dashboard/Index";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Personal Finance - Take Control of Your Financial Future</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+    <link rel="stylesheet" href="~/css/landing.css" asp-append-version="true" />
+    <script>
+        // Apply the saved theme before first paint to avoid a flash.
+        try { if (localStorage.getItem("landing-theme") === "dark") document.documentElement.dataset.theme = "dark"; } catch (e) { }
+    </script>
+</head>
+<body class="lp">
+
+    <!-- ============ Navbar ============ -->
+    <header class="lp-nav">
+        <div class="lp-container lp-nav-inner">
+            <a class="lp-logo" href="/">
+                <svg class="lp-logo-mark" viewBox="0 0 48 48" aria-hidden="true">
+                    <rect x="4" y="28" width="7" height="14" rx="1.5" />
+                    <rect x="14" y="21" width="7" height="21" rx="1.5" />
+                    <rect x="24" y="25" width="7" height="17" rx="1.5" />
+                    <path d="M5 22 L17 12 L25 18 L39 6" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M32 5 H40 V13" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+                    <ellipse cx="40" cy="41" rx="6.5" ry="2.6" />
+                    <ellipse cx="40" cy="36.5" rx="6.5" ry="2.6" />
+                    <ellipse cx="40" cy="32" rx="6.5" ry="2.6" />
+                </svg>
+                <span>Personal Finance</span>
+            </a>
+
+            <nav class="lp-menu" id="lpMenu">
+                <a href="#home" class="active">Home</a>
+                <a href="#features">Features</a>
+                <a href="#about">About</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#contact">Contact</a>
+                <div class="lp-menu-actions">
+                    @if (Model.IsSignedIn)
+                    {
+                        <a class="lp-btn lp-btn-primary" href="@dashboardUrl">Open Dashboard</a>
+                    }
+                    else
+                    {
+                        <a class="lp-btn lp-btn-outline" href="@loginUrl">Sign In</a>
+                        <a class="lp-btn lp-btn-primary" href="@registerUrl">Get Started</a>
+                    }
+                </div>
+            </nav>
+
+            <div class="lp-nav-actions">
+                <button class="lp-theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">
+                    <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" /><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" /></svg>
+                    <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" /></svg>
+                </button>
+                @if (Model.IsSignedIn)
+                {
+                    <a class="lp-btn lp-btn-primary lp-hide-sm" href="@dashboardUrl">Open Dashboard</a>
+                }
+                else
+                {
+                    <a class="lp-btn lp-btn-outline lp-hide-sm" href="@loginUrl">Sign In</a>
+                    <a class="lp-btn lp-btn-primary lp-hide-sm" href="@registerUrl">Get Started</a>
+                }
+                <button class="lp-burger" id="menuToggle" type="button" aria-label="Open menu" aria-controls="lpMenu" aria-expanded="false">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- ============ Hero ============ -->
+        <section class="lp-hero" id="home">
+            <div class="lp-container lp-hero-grid">
+                <div class="lp-hero-copy">
+                    <span class="lp-pill">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c0-8 5-13 15-14-1 10-6 15-14 15" /><path d="M5 19c3-4 6-7 10-9" fill="none" /></svg>
+                        Better Money <i>•</i> Brighter Future
+                    </span>
+                    <h1>Take Control of Your <span>Financial Future</span></h1>
+                    <p class="lp-lead">
+                        Track your income, manage your expenses, set budgets, and achieve your
+                        financial goals — all in one place.
+                    </p>
+                    <div class="lp-hero-ctas">
+                        <a class="lp-btn lp-btn-primary lp-btn-lg" href="@(Model.IsSignedIn ? dashboardUrl : registerUrl)">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6" /></svg>
+                            @(Model.IsSignedIn ? "Go to Dashboard" : "Get Started Free")
+                        </a>
+                        <a class="lp-btn lp-btn-outline lp-btn-lg" href="#how-it-works">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" class="lp-play"><circle cx="12" cy="12" r="10" /><path d="M10 8.5v7l6-3.5z" /></svg>
+                            Watch Demo
+                        </a>
+                    </div>
+                    <ul class="lp-checks">
+                        <li><span class="lp-check"></span>Free to use</li>
+                        <li><span class="lp-check"></span>Secure &amp; Private</li>
+                        <li><span class="lp-check"></span>Easy to use</li>
+                    </ul>
+                </div>
+
+                <!-- Device mockup -->
+                <div class="lp-hero-visual" aria-hidden="true">
+                    <div class="lp-blob"></div>
+
+                    <div class="lp-plant">
+                        <svg viewBox="0 0 120 200">
+                            <path class="leaf" d="M58 120 C20 110 8 70 18 40 C45 55 62 85 58 120Z" />
+                            <path class="leaf leaf-2" d="M62 118 C70 80 95 55 112 52 C115 85 95 112 62 118Z" />
+                            <path class="leaf" d="M60 122 C50 85 55 40 72 12 C88 45 80 90 60 122Z" />
+                            <path class="stem" d="M58 120 L60 150 M60 122 L62 150" />
+                            <path class="pot" d="M30 145 H92 L85 196 H37Z" />
+                        </svg>
+                    </div>
+
+                    <div class="lp-laptop">
+                        <div class="lp-screen">
+                            <div class="mk-top">
+                                <span class="mk-brand"><i class="mk-dot-logo"></i>Personal Finance</span>
+                                <span class="mk-top-icons"><i></i><i></i><i class="mk-avatar"></i></span>
+                            </div>
+                            <div class="mk-body">
+                                <aside class="mk-side">
+                                    <span class="on">Dashboard</span>
+                                    <span>Income</span>
+                                    <span>Expenses</span>
+                                    <span>Budgets</span>
+                                    <span>Reports</span>
+                                    <span>Savings</span>
+                                    <span>Settings</span>
+                                </aside>
+                                <div class="mk-main">
+                                    <div class="mk-welcome">
+                                        <strong>Welcome back!</strong>
+                                        <small>Here's your financial overview for this month.</small>
+                                    </div>
+                                    <div class="mk-stats">
+                                        <div class="mk-stat"><small><i class="g"></i>Total Income</small><b class="g">$2,500</b></div>
+                                        <div class="mk-stat"><small><i class="r"></i>Total Expenses</small><b class="r">$1,350</b></div>
+                                        <div class="mk-stat"><small><i class="b"></i>Current Balance</small><b class="g">$1,150</b></div>
+                                    </div>
+                                    <div class="mk-chart">
+                                        <strong>Spending Overview</strong>
+                                        <div class="mk-chart-row">
+                                            <div class="mk-donut"></div>
+                                            <ul class="mk-legend">
+                                                <li><i style="background:#10b981"></i>Food<em>32%</em></li>
+                                                <li><i style="background:#3b82f6"></i>Transport<em>18%</em></li>
+                                                <li><i style="background:#a855f7"></i>Bills<em>15%</em></li>
+                                                <li><i style="background:#f59e0b"></i>Entertainment<em>12%</em></li>
+                                                <li><i style="background:#94a3b8"></i>Other<em>23%</em></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lp-laptop-base"></div>
+                    </div>
+
+                    <div class="lp-coins">
+                        <span></span><span></span><span></span><span></span><span></span>
+                        <b>$</b>
+                    </div>
+
+                    <div class="lp-phone">
+                        <div class="ph-notch"></div>
+                        <div class="ph-head"><span>Personal Finance</span></div>
+                        <div class="ph-balance">
+                            <small>Total Balance</small>
+                            <b>$1,150</b>
+                        </div>
+                        <div class="ph-list">
+                            <small>Recent Transactions</small>
+                            <div class="ph-tx"><i class="g"></i><span>Groceries<em>Food</em></span><b class="r">-$50.00<em>Sep 22</em></b></div>
+                            <div class="ph-tx"><i class="b"></i><span>Salary<em>Income</em></span><b class="g">+$2,000.00<em>Sep 21</em></b></div>
+                            <div class="ph-tx"><i class="r"></i><span>Bus Fare<em>Transport</em></span><b class="r">-$30.00<em>Sep 19</em></b></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ Features ============ -->
+        <section class="lp-section" id="features">
+            <div class="lp-container">
+                <p class="lp-eyebrow">Why choose us</p>
+                <h2 class="lp-title">Everything You Need for Better Money Management</h2>
+                <div class="lp-features">
+                    <article class="lp-feature">
+                        <div class="lp-icon"><svg viewBox="0 0 24 24"><path class="fill" d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5z" /></svg></div>
+                        <h3>Secure &amp; Private</h3>
+                        <p>Your data is protected with industry-standard security.</p>
+                    </article>
+                    <article class="lp-feature">
+                        <div class="lp-icon"><svg viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5" /><path d="M10.5 18h3" /></svg></div>
+                        <h3>Track Expenses</h3>
+                        <p>Easily record and categorize your daily expenses.</p>
+                    </article>
+                    <article class="lp-feature">
+                        <div class="lp-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle class="fill" cx="12" cy="12" r="1.5" /><path d="m12 12 7-7M16 5h3v3" /></svg></div>
+                        <h3>Set Budgets</h3>
+                        <p>Stay on track with monthly and category budgets.</p>
+                    </article>
+                    <article class="lp-feature">
+                        <div class="lp-icon"><svg viewBox="0 0 24 24"><path d="M4 20V14M9 20v-8M14 20v-5M19 20V9" /><path d="m4 10 5-4 4 3 7-6M16 3h4v4" /></svg></div>
+                        <h3>Get Insights</h3>
+                        <p>View reports and charts to understand your spending habits.</p>
+                    </article>
+                    <article class="lp-feature">
+                        <div class="lp-icon"><svg viewBox="0 0 24 24"><path class="fill" d="m12 2.8 2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z" /></svg></div>
+                        <h3>Reach Your Goals</h3>
+                        <p>Save more and achieve your financial dreams.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ How it works ============ -->
+        <section class="lp-section lp-tinted" id="how-it-works">
+            <div class="lp-container">
+                <p class="lp-eyebrow">How it works</p>
+                <h2 class="lp-title">Get Started in 3 Simple Steps</h2>
+                <div class="lp-steps">
+                    <div class="lp-step">
+                        <span class="lp-step-num">1</span>
+                        <div class="lp-icon lp-icon-sm"><svg viewBox="0 0 24 24"><circle class="fill" cx="12" cy="8" r="4" /><path class="fill" d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z" /></svg></div>
+                        <div>
+                            <h3>Create Your Account</h3>
+                            <p>Sign up in just a minute. It's free and easy.</p>
+                        </div>
+                    </div>
+                    <div class="lp-step">
+                        <span class="lp-step-num">2</span>
+                        <div class="lp-icon lp-icon-sm"><svg viewBox="0 0 24 24"><path class="fill" d="M3 7a3 3 0 0 1 3-3h11v3H6.5a.5.5 0 0 0 0 1H21v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z" /><circle cx="16.5" cy="14" r="1.4" fill="#fff" stroke="none" /></svg></div>
+                        <div>
+                            <h3>Add Your Transactions</h3>
+                            <p>Record your income and expenses and categorize them.</p>
+                        </div>
+                    </div>
+                    <div class="lp-step">
+                        <span class="lp-step-num">3</span>
+                        <div class="lp-icon lp-icon-sm"><svg viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-8M15 7h6v6" /></svg></div>
+                        <div>
+                            <h3>Track &amp; Grow</h3>
+                            <p>See your progress, set goals, and build a better financial future.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ About ============ -->
+        <section class="lp-section" id="about">
+            <div class="lp-container lp-about">
+                <div>
+                    <p class="lp-eyebrow lp-left">About</p>
+                    <h2 class="lp-title lp-left">A clear picture of your money, every day</h2>
+                    <p class="lp-muted">
+                        Personal Finance is a dashboard built to make everyday money management simple.
+                        Record income and expenses, plan monthly budgets per category, get alerts before
+                        you overspend, and watch your savings goals grow — all from one place.
+                    </p>
+                </div>
+                <div class="lp-about-stats">
+                    <div><b>Income</b><span>&amp; expense tracking</span></div>
+                    <div><b>Budgets</b><span>with overspending alerts</span></div>
+                    <div><b>Reports</b><span>charts by month &amp; category</span></div>
+                    <div><b>Savings</b><span>goals with progress</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ Pricing ============ -->
+        <section class="lp-section lp-tinted" id="pricing">
+            <div class="lp-container">
+                <p class="lp-eyebrow">Pricing</p>
+                <h2 class="lp-title">Simple and Free</h2>
+                <div class="lp-price-card">
+                    <div class="lp-price"><b>$0</b><span>/ forever</span></div>
+                    <ul>
+                        <li><span class="lp-check"></span>Unlimited income &amp; expense entries</li>
+                        <li><span class="lp-check"></span>Monthly and category budgets</li>
+                        <li><span class="lp-check"></span>Savings goals &amp; notifications</li>
+                        <li><span class="lp-check"></span>Reports and spending insights</li>
+                    </ul>
+                    <a class="lp-btn lp-btn-primary lp-btn-lg lp-btn-block" href="@(Model.IsSignedIn ? dashboardUrl : registerUrl)">
+                        @(Model.IsSignedIn ? "Go to Dashboard" : "Create Free Account")
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ CTA / Contact ============ -->
+        <section class="lp-section" id="contact">
+            <div class="lp-container">
+                <div class="lp-cta">
+                    <div>
+                        <h2>Ready to take control of your money?</h2>
+                        <p>Join today and start building a better financial future.</p>
+                    </div>
+                    <a class="lp-btn lp-btn-light lp-btn-lg" href="@(Model.IsSignedIn ? dashboardUrl : registerUrl)">
+                        @(Model.IsSignedIn ? "Open Dashboard" : "Get Started Free")
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="lp-footer">
+        <div class="lp-container lp-footer-inner">
+            <span>&copy; @DateTime.Now.Year Personal Finance Dashboard</span>
+            <nav>
+                <a href="#features">Features</a>
+                <a href="#about">About</a>
+                <a href="/Privacy">Privacy</a>
+            </nav>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var root = document.documentElement;
+            document.getElementById("themeToggle").addEventListener("click", function () {
+                var dark = root.dataset.theme !== "dark";
+                if (dark) root.dataset.theme = "dark"; else delete root.dataset.theme;
+                try { localStorage.setItem("landing-theme", dark ? "dark" : "light"); } catch (e) { }
+            });
+
+            var menu = document.getElementById("lpMenu");
+            var burger = document.getElementById("menuToggle");
+            burger.addEventListener("click", function () {
+                var open = menu.classList.toggle("open");
+                burger.setAttribute("aria-expanded", open);
+            });
+            menu.querySelectorAll("a[href^='#']").forEach(function (a) {
+                a.addEventListener("click", function () { menu.classList.remove("open"); burger.setAttribute("aria-expanded", "false"); });
+            });
+
+            // Highlight the menu link of the section currently in view.
+            var links = menu.querySelectorAll("a[href^='#']");
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (!entry.isIntersecting) return;
+                    links.forEach(function (l) { l.classList.toggle("active", l.getAttribute("href") === "#" + entry.target.id); });
+                });
+            }, { rootMargin: "-45% 0px -50% 0px" });
+            ["home", "features", "about", "pricing", "contact"].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) observer.observe(el);
+            });
+        })();
+    </script>
+</body>
+</html>

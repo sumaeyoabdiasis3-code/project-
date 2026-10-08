@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Personal Finance Dashboard</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+</head>
+<body class="auth-body">
+    <div class="auth-shell">
+        <div class="auth-brand-panel">
+            <div class="auth-brand-content">
+                <div class="auth-brand-logo">
+                    <span class="auth-brand-icon">💰</span>
+                    <div>
+                        <div class="auth-brand-title">Personal Finance</div>
+                        <div class="auth-brand-subtitle">Dashboard</div>
+                    </div>
+                </div>
+
+                <h1 class="auth-brand-heading">Take control of your money, one entry at a time.</h1>
+                <p class="auth-brand-text">
+                    Track income and expenses, plan monthly budgets, and watch your savings
+                    goals grow — all from a single, clear dashboard.
+                </p>
+
+                <ul class="auth-feature-list">
+                    <li><span class="auth-feature-icon">📊</span> Real-time income vs. expense analytics</li>
+                    <li><span class="auth-feature-icon">🎯</span> Savings goals with progress tracking</li>
+                    <li><span class="auth-feature-icon">🔔</span> Smart budget and overspending alerts</li>
+                </ul>
+            </div>
+
+            <div class="auth-brand-glow auth-glow-1"></div>
+            <div class="auth-brand-glow auth-glow-2"></div>
+        </div>
+
+        <div class="auth-form-panel">
+            <div class="auth-form-wrap">
+                @RenderBody()
+            </div>
+            <footer class="auth-footer">&copy; @DateTime.Now.Year Personal Finance Dashboard</footer>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

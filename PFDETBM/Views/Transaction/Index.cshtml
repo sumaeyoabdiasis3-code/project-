@@ -1,0 +1,125 @@
+@model PFDETBM.ViewModels.TransactionsIndexViewModel
+@{
+    ViewData["Title"] = "Transactions";
+    var totalIncome = Model.Items.Where(i => !i.IsExpense).Sum(i => i.Amount);
+    var totalExpense = Model.Items.Where(i => i.IsExpense).Sum(i => i.Amount);
+}
+
+<div class="dashboard-page">
+    <div class="mb-4">
+        <h1 class="mb-1">Transactions</h1>
+        <p class="text-muted mb-0">Search and filter every income and expense entry.</p>
+    </div>
+
+    <div class="card dashboard-card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small">Search</label>
+                    <input type="text" name="search" value="@Model.Search" class="form-control" placeholder="Description or category..." />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">Type</label>
+                    <select name="type" class="form-select">
+                        <option value="" selected="@(string.IsNullOrEmpty(Model.Type))">All</option>
+                        <option value="income" selected="@(Model.Type == "income")">Income</option>
+                        <option value="expense" selected="@(Model.Type == "expense")">Expense</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">Category</label>
+                    <select name="category" class="form-select">
+                        <option value="">All</option>
+                        @foreach (var c in Model.CategoryOptions)
+                        {
+                            <option value="@c.Value" selected="@(Model.CategoryName == c.Value)">@c.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">From</label>
+                    <input type="date" name="from" value="@(Model.From?.ToString("yyyy-MM-dd"))" class="form-control" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small">To</label>
+                    <input type="date" name="to" value="@(Model.To?.ToString("yyyy-MM-dd"))" class="form-control" />
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card stat-card stat-card-green p-3">
+                <small class="text-muted">Income (filtered)</small>
+                <h4 class="mb-0 amount-positive">+@totalIncome.ToString("C")</h4>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card stat-card-red p-3">
+                <small class="text-muted">Expenses (filtered)</small>
+                <h4 class="mb-0 amount-negative">-@totalExpense.ToString("C")</h4>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card stat-card-blue p-3">
+                <small class="text-muted">Net</small>
+                <h4 class="mb-0">@((totalIncome - totalExpense).ToString("C"))</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="card dashboard-card">
+        <div class="card-body">
+            @if (Model.Items.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr class="text-muted small">
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Category / Source</th>
+                                <th>Description</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td class="text-muted small">@item.Date.ToString("MMM d, yyyy")</td>
+                                    <td>
+                                        @if (item.IsExpense)
+                                        {
+                                            <span class="badge-expense">Expense</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge-income">Income</span>
+                                        }
+                                    </td>
+                                    <td>@item.Label</td>
+                                    <td>@item.Description</td>
+                                    <td class="text-end @(item.IsExpense ? "amount-negative" : "amount-positive")">
+                                        @(item.IsExpense ? "-" : "+")@item.Amount.ToString("C")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <span class="empty-icon">📄</span>
+                    No transactions match these filters.
+                </div>
+            }
+        </div>
+    </div>
+</div>

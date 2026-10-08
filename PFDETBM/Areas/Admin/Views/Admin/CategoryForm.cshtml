@@ -1,0 +1,34 @@
+@model PFDETBM.ViewModels.CategoryFormViewModel
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Add Category" : "Edit Category";
+}
+
+<div class="dashboard-page">
+    <h1 class="mb-4">@ViewData["Title"]</h1>
+
+    <div class="card dashboard-card" style="max-width:480px;">
+        <div class="card-body">
+            <form asp-action="@(Model.Id == 0 ? "CategoryCreate" : "CategoryEdit")" asp-route-id="@Model.Id" method="post" class="auth-form">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="Id" />
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="mb-4 form-check">
+                    <input asp-for="IsExpense" class="form-check-input" />
+                    <label asp-for="IsExpense" class="form-check-label"></label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save Category</button>
+                <a asp-action="Categories" class="btn btn-outline-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

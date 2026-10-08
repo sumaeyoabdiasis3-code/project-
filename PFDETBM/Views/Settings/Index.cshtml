@@ -1,0 +1,72 @@
+@model PFDETBM.ViewModels.ProfileSettingsViewModel
+@{
+    ViewData["Title"] = "Settings";
+    var passwordModel = (PFDETBM.ViewModels.ChangePasswordViewModel)ViewBag.PasswordModel;
+}
+
+<div class="dashboard-page">
+    <div class="mb-4">
+        <h1 class="mb-1">Settings</h1>
+        <p class="text-muted mb-0">Manage your profile and password.</p>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h6 class="mb-3">Profile</h6>
+                    <form asp-controller="Settings" asp-action="UpdateProfile" method="post" class="auth-form">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input class="form-control" value="@Model.Email" disabled />
+                        </div>
+                        <div class="mb-4">
+                            <label asp-for="FullName" class="form-label"></label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Save Profile</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <h6 class="mb-3">Change Password</h6>
+                    <form asp-controller="Settings" asp-action="ChangePassword" method="post" class="auth-form">
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Current password</label>
+                            <input type="password" name="CurrentPassword" class="form-control" value="@passwordModel.CurrentPassword" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">New password</label>
+                            <input type="password" name="NewPassword" class="form-control" value="@passwordModel.NewPassword" />
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Confirm new password</label>
+                            <input type="password" name="ConfirmPassword" class="form-control" value="@passwordModel.ConfirmPassword" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Change Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,38 @@
+@page
+@model PFDETBM.Areas.Identity.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Sign In";
+}
+
+<h1 class="auth-card-title">Welcome back</h1>
+<p class="auth-card-subtitle">Sign in to continue to your dashboard.</p>
+
+<form id="account" method="post" class="auth-form">
+    <div asp-validation-summary="ModelOnly" class="text-danger auth-validation-summary mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="Input.Email" class="form-label"></label>
+        <input asp-for="Input.Email" class="form-control" autocomplete="username" placeholder="you@example.com" autofocus />
+        <span asp-validation-for="Input.Email" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Input.Password" class="form-label"></label>
+        <input asp-for="Input.Password" class="form-control" autocomplete="current-password" placeholder="••••••••" />
+        <span asp-validation-for="Input.Password" class="text-danger"></span>
+    </div>
+    <div class="auth-remember-row">
+        <div class="form-check">
+            <input class="form-check-input" asp-for="Input.RememberMe" />
+            <label class="form-check-label" asp-for="Input.RememberMe"></label>
+        </div>
+    </div>
+    <button type="submit" class="auth-submit-btn">Sign In</button>
+</form>
+
+<p class="auth-switch-text">
+    Don't have an account? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Create one</a>
+</p>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

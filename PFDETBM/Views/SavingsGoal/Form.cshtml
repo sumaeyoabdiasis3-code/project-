@@ -1,0 +1,40 @@
+@model PFDETBM.ViewModels.SavingsGoalFormViewModel
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Set Savings Goal" : "Edit Savings Goal";
+}
+
+<div class="dashboard-page">
+    <h1 class="mb-4">@ViewData["Title"]</h1>
+
+    <div class="card dashboard-card" style="max-width:560px;">
+        <div class="card-body">
+            <form asp-action="@(Model.Id == 0 ? "Create" : "Edit")" asp-route-id="@Model.Id" method="post" class="auth-form">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="Id" />
+
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label"></label>
+                    <input asp-for="Title" class="form-control" placeholder="e.g. Laptop Upgrade, Emergency Fund" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="TargetAmount" class="form-label"></label>
+                    <input asp-for="TargetAmount" class="form-control" type="number" step="0.01" min="0.01" />
+                    <span asp-validation-for="TargetAmount" class="text-danger"></span>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="TargetDate" class="form-label"></label>
+                    <input asp-for="TargetDate" class="form-control" type="date" />
+                    <span asp-validation-for="TargetDate" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save Goal</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

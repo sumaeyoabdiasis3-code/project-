@@ -1,0 +1,375 @@
+@model PFDETBM.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Overview";
+}
+
+@functions {
+    string TrendClass(decimal pct) => pct > 0 ? "trend-up" : pct < 0 ? "trend-down" : "trend-flat";
+    string TrendArrow(decimal pct) => pct > 0 ? "▲" : pct < 0 ? "▼" : "▬";
+}
+
+<div class="dashboard-page">
+    <div class="dashboard-intro d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="mb-2">Welcome Back, <span class="text-primary">@Model.DisplayName</span>!</h1>
+            <p class="text-muted mb-0">Here's your financial overview for @Model.MonthLabel.</p>
+        </div>
+        <div class="date-chip">@DateTime.Now.ToString("MMMM d, yyyy")</div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-sm-6">
+            <a asp-controller="Transaction" asp-action="Index" class="stat-card-link">
+                <div class="card stat-card stat-card-blue p-4 h-100">
+                    <small class="text-muted">Total Balance</small>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <h3 class="mb-1">@Model.CurrentBalance.ToString("C")</h3>
+                            <small class="@TrendClass(Model.BalanceChangePercent)">@TrendArrow(Model.BalanceChangePercent) @Math.Abs(Model.BalanceChangePercent)% from last month</small>
+                        </div>
+                        <div class="stat-icon bg-primary-light">💼</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <a asp-controller="Income" asp-action="Index" class="stat-card-link">
+                <div class="card stat-card stat-card-green p-4 h-100">
+                    <small class="text-muted">Total Income</small>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <h3 class="mb-1">@Model.TotalIncome.ToString("C")</h3>
+                            <small class="@TrendClass(Model.IncomeChangePercent)">@TrendArrow(Model.IncomeChangePercent) @Math.Abs(Model.IncomeChangePercent)% from last month</small>
+                        </div>
+                        <div class="stat-icon bg-success-light">💰</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <a asp-controller="Expense" asp-action="Index" class="stat-card-link">
+                <div class="card stat-card stat-card-red p-4 h-100">
+                    <small class="text-muted">Total Expenses</small>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <h3 class="mb-1">@Model.TotalExpenses.ToString("C")</h3>
+                            <small class="@TrendClass(-Model.ExpenseChangePercent)">@TrendArrow(-Model.ExpenseChangePercent) @Math.Abs(Model.ExpenseChangePercent)% from last month</small>
+                        </div>
+                        <div class="stat-icon bg-danger-light">📉</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <a asp-controller="SavingsGoal" asp-action="Index" class="stat-card-link">
+                <div class="card stat-card stat-card-purple p-4 h-100">
+                    <small class="text-muted">Total Savings</small>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <h3 class="mb-1">@Model.TotalSavings.ToString("C")</h3>
+                            <small class="@TrendClass(Model.SavingsChangePercent)">@TrendArrow(Model.SavingsChangePercent) @Math.Abs(Model.SavingsChangePercent)% from last month</small>
+                        </div>
+                        <div class="stat-icon bg-purple-light">🧾</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-xl-7">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h6 class="mb-0">Monthly Trend</h6>
+                            <small class="text-muted">Income vs Expenses (last 6 months)</small>
+                        </div>
+                    </div>
+                    <div class="chart-card p-3 rounded-4">
+                        <canvas id="lineChart" height="260"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-5">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0">Expenses by Category</h6>
+                        <small class="text-muted">@Model.MonthLabel</small>
+                    </div>
+                    @if (Model.ExpenseByCategory.Any())
+                    {
+                        <div class="d-flex flex-column flex-sm-row align-items-center gap-3">
+                            <div class="chart-card p-3 rounded-4 flex-shrink-0" style="width:180px;">
+                                <canvas id="pieChart" width="150" height="150"></canvas>
+                            </div>
+                            <ul class="legend-list flex-fill w-100">
+                                @foreach (var slice in Model.ExpenseByCategory)
+                                {
+                                    <li class="legend-row">
+                                        <span class="legend-label">
+                                            <span class="legend-dot" style="background:@slice.Color;"></span>@slice.Name
+                                        </span>
+                                        <span>
+                                            <span class="legend-value">@slice.Percent%</span>
+                                            <span class="legend-percent">(@slice.Amount.ToString("C"))</span>
+                                        </span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <span class="empty-icon">🧾</span>
+                            No expenses recorded for @Model.MonthLabel yet.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-xl-7">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0">Recent Transactions</h6>
+                        <a asp-controller="Transaction" asp-action="Index" class="small text-decoration-none">View all</a>
+                    </div>
+                    @if (Model.RecentTransactions.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead>
+                                    <tr class="text-muted small">
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Category</th>
+                                        <th>Description</th>
+                                        <th class="text-end">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var transaction in Model.RecentTransactions.Take(5))
+                                    {
+                                        <tr>
+                                            <td class="text-muted small">@transaction.Date.ToString("MMM d, yyyy")</td>
+                                            <td>
+                                                @if (transaction.IsExpense)
+                                                {
+                                                    <span class="badge-expense">Expense</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge-income">Income</span>
+                                                }
+                                            </td>
+                                            <td>@transaction.Label</td>
+                                            <td>@transaction.Description</td>
+                                            <td class="text-end @(transaction.IsExpense ? "amount-negative" : "amount-positive")">
+                                                @(transaction.IsExpense ? "-" : "+")@transaction.Amount.ToString("C")
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <span class="empty-icon">📄</span>
+                            No transactions yet. Once you add income or expenses, they'll show up here.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-5">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0">Budget Progress</h6>
+                        <a asp-controller="Budget" asp-action="Index" class="small text-decoration-none">View all</a>
+                    </div>
+                    @if (Model.BudgetProgress.Any())
+                    {
+                        @foreach (var item in Model.BudgetProgress)
+                        {
+                            var barColor = item.PercentUsed >= 100 ? "#dc2626" : item.PercentUsed >= 80 ? "#f59e0b" : "#16a34a";
+                            <div class="budget-progress-item">
+                                <div class="budget-progress-head">
+                                    <span class="budget-progress-cat">
+                                        <span class="budget-dot" style="background:@item.Color;"></span>@item.CategoryName
+                                    </span>
+                                    <span class="budget-progress-amounts">@item.Spent.ToString("C") / @item.BudgetAmount.ToString("C")</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width:@(Math.Min(item.PercentUsed, 100))%; background:@barColor;"></div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <span class="empty-icon">📊</span>
+                            No budgets set for @Model.MonthLabel yet.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-xl-4">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0">Savings Goals</h6>
+                        <a asp-controller="SavingsGoal" asp-action="Index" class="small text-decoration-none">View all</a>
+                    </div>
+                    @if (Model.SavingsGoals.Any())
+                    {
+                        @foreach (var goal in Model.SavingsGoals)
+                        {
+                            var progress = goal.TargetAmount == 0 ? 0 : Math.Min(100, Math.Round((double)(goal.CurrentAmount / goal.TargetAmount) * 100, 0));
+                            <div class="savings-goal-item">
+                                <div class="savings-goal-icon">🎯</div>
+                                <div class="savings-goal-info">
+                                    <div class="savings-goal-title">@goal.Title</div>
+                                    <div class="savings-goal-meta">@goal.CurrentAmount.ToString("C") / @goal.TargetAmount.ToString("C") &middot; Target: @goal.TargetDate.ToString("MMM d, yyyy")</div>
+                                    <div class="progress mt-1">
+                                        <div class="progress-bar bg-primary" style="width:@progress%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <span class="empty-icon">🎯</span>
+                            No savings goals yet.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0">Quick Actions</h6>
+                    </div>
+                    <div class="quick-action-grid">
+                        <a asp-controller="Income" asp-action="Create" class="quick-action-btn qa-green"><span class="qa-icon">➕</span>Add Income</a>
+                        <a asp-controller="Expense" asp-action="Create" class="quick-action-btn qa-red"><span class="qa-icon">➖</span>Add Expense</a>
+                        <a asp-controller="Budget" asp-action="Create" class="quick-action-btn qa-blue"><span class="qa-icon">📅</span>Create Budget</a>
+                        <a asp-controller="SavingsGoal" asp-action="Create" class="quick-action-btn qa-purple"><span class="qa-icon">🎯</span>Set Goal</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card dashboard-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0">Recent Notifications</h6>
+                        <a asp-controller="Notification" asp-action="Index" class="small text-decoration-none">View all</a>
+                    </div>
+                    @if (Model.Notifications.Any())
+                    {
+                        @foreach (var note in Model.Notifications)
+                        {
+                            <div class="notification-item">
+                                <div class="notification-icon severity-@note.Severity">@note.Icon</div>
+                                <div class="flex-fill">
+                                    <div class="notification-title">@note.Title</div>
+                                    <div class="notification-message">@note.Message</div>
+                                </div>
+                                <div class="notification-time">@note.TimeAgo</div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <span class="empty-icon">✅</span>
+                            No alerts right now — you're all caught up.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const trendLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyTrend.Select(t => t.Label)));
+        const trendIncome = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyTrend.Select(t => t.Income)));
+        const trendExpenses = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyTrend.Select(t => t.Expenses)));
+
+        new Chart(document.getElementById('lineChart'), {
+            type: 'line',
+            data: {
+                labels: trendLabels,
+                datasets: [{
+                    label: 'Income',
+                    data: trendIncome,
+                    borderColor: '#16a34a',
+                    backgroundColor: 'rgba(22,163,74,0.12)',
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Expenses',
+                    data: trendExpenses,
+                    borderColor: '#dc2626',
+                    backgroundColor: 'rgba(220,38,38,0.12)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'top', labels: { boxWidth: 12, padding: 16 } } },
+                scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } }, x: { grid: { display: false } } }
+            }
+        });
+
+        @if (Model.ExpenseByCategory.Any())
+        {
+            <text>
+        const categoryLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ExpenseByCategory.Select(c => c.Name)));
+        const categoryData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ExpenseByCategory.Select(c => c.Amount)));
+        const categoryColors = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ExpenseByCategory.Select(c => c.Color)));
+
+        new Chart(document.getElementById('pieChart'), {
+            type: 'doughnut',
+            data: {
+                labels: categoryLabels,
+                datasets: [{
+                    data: categoryData,
+                    backgroundColor: categoryColors
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                cutout: '68%'
+            }
+        });
+            </text>
+        }
+    </script>
+}
