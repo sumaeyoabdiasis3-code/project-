@@ -34,21 +34,42 @@ namespace PFDETBM.Data
             if (!string.IsNullOrWhiteSpace(adminPassword))
             {
                 var adminEmail = configuration["BootstrapAdmin:Email"] ?? "admin@pfdetbm.local";
+                var adminUserName = configuration["BootstrapAdmin:Username"] ?? adminEmail;
+                var adminFullName = configuration["BootstrapAdmin:FullName"] ?? adminUserName;
                 var admin = await userManager.FindByEmailAsync(adminEmail);
                 if (admin == null)
                 {
                     admin = new ApplicationUser
                     {
-                        UserName = adminEmail,
+                        UserName = adminUserName,
                         Email = adminEmail,
                         EmailConfirmed = true,
-                        FullName = "System Administrator"
+                        FullName = adminFullName
                     };
                     var result = await userManager.CreateAsync(admin, adminPassword);
-                    if (result.Succeeded)
+                    if (!result.Succeeded)
                     {
-                        await userManager.AddToRoleAsync(admin, "Admin");
+                        var errors = string.Join(", ", result.Errors.Select(error => error.Description));
+                        throw new InvalidOperationException($"Unable to create the bootstrap admin account: {errors}");
                     }
+                }
+
+                if (!string.Equals(admin.UserName, adminUserName, StringComparison.Ordinal))
+                {
+                    var userNameResult = await userManager.SetUserNameAsync(admin, adminUserName);
+                    if (!userNameResult.Succeeded)
+                    {
+                        var errors = string.Join(", ", userNameResult.Errors.Select(error => error.Description));
+                        throw new InvalidOperationException($"Unable to set the bootstrap admin username: {errors}");
+                    }
+                }
+
+                admin.FullName = adminFullName;
+                await userManager.UpdateAsync(admin);
+
+                if (!await userManager.IsInRoleAsync(admin, "Admin"))
+                {
+                    await userManager.AddToRoleAsync(admin, "Admin");
                 }
             }
 

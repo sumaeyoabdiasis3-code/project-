@@ -12,11 +12,16 @@ namespace PFDETBM.Areas.Identity.Pages.Account
     public class LoginModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(
+            SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            ILogger<LoginModel> logger)
         {
             _signInManager = signInManager;
+            _userManager = userManager;
             _logger = logger;
         }
 
@@ -28,9 +33,8 @@ namespace PFDETBM.Areas.Identity.Pages.Account
         public class InputModel
         {
             [Required]
-            [EmailAddress]
-            [Display(Name = "Email")]
-            public string Email { get; set; } = string.Empty;
+            [Display(Name = "Username or email")]
+            public string UserNameOrEmail { get; set; } = string.Empty;
 
             [Required]
             [DataType(DataType.Password)]
@@ -56,12 +60,17 @@ namespace PFDETBM.Areas.Identity.Pages.Account
                 return Page();
             }
 
-            var result = await _signInManager.PasswordSignInAsync(
-                Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+            var user = await _userManager.FindByNameAsync(Input.UserNameOrEmail)
+                ?? await _userManager.FindByEmailAsync(Input.UserNameOrEmail);
+
+            var result = user == null
+                ? Microsoft.AspNetCore.Identity.SignInResult.Failed
+                : await _signInManager.PasswordSignInAsync(
+                    user.UserName!, Input.Password, Input.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
-                _logger.LogInformation("User {Email} logged in.", Input.Email);
+                _logger.LogInformation("User {UserName} logged in.", user!.UserName);
                 return LocalRedirect(ReturnUrl);
             }
 
